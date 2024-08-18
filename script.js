@@ -14,6 +14,7 @@ let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 let currentPage = 1;
 const expensesPerPage = 10;
 let monthlyBudget = parseFloat(localStorage.getItem('monthlyBudget')) || 0;
+let savingsGoals = JSON.parse(localStorage.getItem('savingsGoals')) || [];
 
 function addExpense(event) {
     event.preventDefault();
@@ -204,6 +205,7 @@ function updateTrendChart() {
 function updateLocalStorage() {
     localStorage.setItem('expenses', JSON.stringify(expenses));
     localStorage.setItem('monthlyBudget', monthlyBudget.toString());
+    localStorage.setItem('savingsGoals', JSON.stringify(savingsGoals));
 }
 
 function setBudget(event) {
@@ -264,28 +266,63 @@ function updateDashboard() {
         <h3>Recent Expenses</h3>
         <ul>${recentExpensesHtml}</ul>
     `;
+
+    updateRecentExpenses();
+    updateExpenseAnalytics();
 }
 
-addExpenseForm.addEventListener('submit', addExpense);
-categoryFilter.addEventListener('change', updateExpenseList);
-sortBy.addEventListener('change', updateExpenseList);
-prevPageBtn.addEventListener('click', () => {
-    if (currentPage > 1) {
-        currentPage--;
-        updateExpenseList();
-    }
-});
-nextPageBtn.addEventListener('click', () => {
-    const totalPages = Math.ceil(filterExpenses().length / expensesPerPage);
-    if (currentPage < totalPages) {
-        currentPage++;
-        updateExpenseList();
-    }
-});
+
+
+function updateMonthlyComparison() {
+    const currentMonth = new Date().getMonth();
+    const currentYearExpenses = expenses.filter(expense => new Date(expense.date).getFullYear() === new Date().getFullYear());
+    const thisMonthTotal = currentYearExpenses.filter(expense => new Date(expense.date).getMonth() === currentMonth)
+        .reduce((sum, expense) => sum + expense.amount, 0);
+    const lastMonthTotal = currentYearExpenses.filter(expense => new Date(expense.date).getMonth() === (currentMonth - 1 + 12) % 12)
+        .reduce((sum, expense) => sum + expense.amount, 0);
+    
+    const difference = thisMonthTotal - lastMonthTotal;
+    const percentageChange = lastMonthTotal !== 0 ? (difference / lastMonthTotal) * 100 : 100;
+    
+    document.getElementById('monthly-comparison').innerHTML = `
+        <h3>Monthly Comparison</h3>
+        <p>This Month: $${thisMonthTotal.toFixed(2)}</p>
+        <p>Last Month: $${lastMonthTotal.toFixed(2)}</p>
+        <p class="${difference >= 0 ? 'danger' : 'success'}">
+            ${difference >= 0 ? 'Increase' : 'Decrease'} of ${Math.abs(percentageChange).toFixed(2)}%
+        </p>
+    `;
+}
+
+function updateCategoryPercentage() {
+    const categories = {};
+    const total = expenses.reduce((sum, expense) => {
+        categories[expense.category] = (categories[expense.category] || 0) + expense.amount;
+        return sum + expense.amount;
+    }, 0);
+    
+    const categoryPercentages = Object.entries(categories).map(([category, amount]) => ({
+        category,
+        percentage: (amount / total) * 100
+    })).sort((a, b) => b.percentage - a.percentage);
+    
+    document.getElementById('category-percentage').innerHTML = `
+        <h3>Category Breakdown</h3>
+        ${categoryPercentages.map(item => `
+            <p>${item.category}: ${item.percentage.toFixed(2)}%</p>
+        `).join('')}
+    `;
+}
+
+
 budgetForm.addEventListener('submit', setBudget);
+document.getElementById('savings-goal-form').addEventListener('submit', addSavingsGoal);
 
 updateExpenseList();
 updateExpenseSummary();
 updateCharts();
 updateBudgetProgress();
 updateDashboard();
+updateRecentExpenses();
+updateExpenseAnalytics();
+updateSavingsGoalsList();
