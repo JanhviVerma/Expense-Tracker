@@ -271,7 +271,25 @@ function updateDashboard() {
     updateExpenseAnalytics();
 }
 
+function updateRecentExpenses() {
+    const recentExpensesList = document.getElementById('recent-expenses-list');
+    const recentExpenses = expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+    
+    recentExpensesList.innerHTML = recentExpenses.map(expense => `
+        <li>
+            <strong>${expense.name}</strong>
+            <span>$${expense.amount.toFixed(2)}</span>
+            <span>${expense.date}</span>
+        </li>
+    `).join('');
+}
 
+function updateExpenseAnalytics() {
+    updateMonthlyComparison();
+    updateCategoryPercentage();
+    updateExpenseForecast();
+    updateExpenseHistoryChart();
+}
 
 function updateMonthlyComparison() {
     const currentMonth = new Date().getMonth();
@@ -314,7 +332,119 @@ function updateCategoryPercentage() {
     `;
 }
 
+function updateExpenseForecast() {
+    const monthlyAverage = expenses.reduce((sum, expense) => sum + expense.amount, 0) / 12;
+    const projectedAnnualExpense = monthlyAverage * 12;
+    
+    document.getElementById('expense-forecast').innerHTML = `
+        <h3>Expense Forecast</h3>
+        <p>Monthly Average: $${monthlyAverage.toFixed(2)}</p>
+        <p>Projected Annual: $${projectedAnnualExpense.toFixed(2)}</p>
+    `;
+}
 
+function updateExpenseHistoryChart() {
+    const ctx = document.getElementById('expense-history-chart').getContext('2d');
+    const monthlyData = Array(12).fill(0);
+    
+    expenses.forEach(expense => {
+        const month = new Date(expense.date).getMonth();
+        monthlyData[month] += expense.amount;
+    });
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Monthly Expenses',
+                data: monthlyData,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function addSavingsGoal(event) {
+    event.preventDefault();
+    const goalName = document.getElementById('goal-name').value;
+    const goalAmount = parseFloat(document.getElementById('goal-amount').value);
+    const goalDate = document.getElementById('goal-date').value;
+    
+    const newGoal = {
+        id: Date.now(),
+        name: goalName,
+        targetAmount: goalAmount,
+        targetDate: goalDate,
+        currentAmount: 0
+    };
+    
+    savingsGoals.push(newGoal);
+    updateLocalStorage();
+    updateSavingsGoalsList();
+    document.getElementById('savings-goal-form').reset();
+}
+
+function updateSavingsGoalsList() {
+    const savingsGoalsList = document.getElementById('savings-goals-list');
+    savingsGoalsList.innerHTML = savingsGoals.map(goal => `
+        <div class="savings-goal">
+            <h4>${goal.name}</h4>
+            <p>Target: $${goal.targetAmount.toFixed(2)} by ${goal.targetDate}</p>
+            <p>Progress: $${goal.currentAmount.toFixed(2)} / $${goal.targetAmount.toFixed(2)}</p>
+            <div class="goal-progress">
+                <div class="goal-progress-bar" style="width: ${(goal.currentAmount / goal.targetAmount) * 100}%"></div>
+            </div>
+            <button onclick="contributeToGoal(${goal.id})">Contribute</button>
+            <button onclick="deleteGoal(${goal.id})">Delete</button>
+        </div>
+    `).join('');
+}
+
+function contributeToGoal(goalId) {
+    const amount = parseFloat(prompt('Enter contribution amount:'));
+    if (isNaN(amount) || amount <= 0) return;
+    
+    const goal = savingsGoals.find(g => g.id === goalId);
+    if (goal) {
+        goal.currentAmount += amount;
+        updateLocalStorage();
+        updateSavingsGoalsList();
+    }
+}
+
+function deleteGoal(goalId) {
+    savingsGoals = savingsGoals.filter(goal => goal.id !== goalId);
+    updateLocalStorage();
+    updateSavingsGoalsList();
+}
+
+addExpenseForm.addEventListener('submit', addExpense);
+categoryFilter.addEventListener('change', updateExpenseList);
+sortBy.addEventListener('change', updateExpenseList);
+prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        updateExpenseList();
+    }
+});
+nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filterExpenses().length / expensesPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        updateExpenseList();
+    }
+});
 budgetForm.addEventListener('submit', setBudget);
 document.getElementById('savings-goal-form').addEventListener('submit', addSavingsGoal);
 
