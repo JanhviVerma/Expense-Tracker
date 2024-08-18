@@ -14,6 +14,7 @@
                 <li><a href="#expense-form">Add Expense</a></li>
                 <li><a href="#expense-list">View Expenses</a></li>
                 <li><a href="#expense-summary">Summary</a></li>
+                <li><a href="#expense-chart">Charts</a></li>
             </ul>
         </nav>
     </header>
@@ -63,16 +64,27 @@
                 </select>
             </div>
             <ul id="expenses"></ul>
+            <div id="pagination">
+                <button id="prev-page">Previous</button>
+                <span id="page-info"></span>
+                <button id="next-page">Next</button>
+            </div>
         </section>
         <section id="expense-summary">
             <h2>Expense Summary</h2>
             <div id="total-expenses"></div>
             <div id="category-breakdown"></div>
         </section>
+        <section id="expense-chart">
+            <h2>Expense Charts</h2>
+            <canvas id="category-chart"></canvas>
+            <canvas id="trend-chart"></canvas>
+        </section>
     </main>
     <footer>
         <p>&copy; 2024 Personal Expense Tracker. All rights reserved.</p>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
