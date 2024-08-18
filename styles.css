@@ -339,3 +339,27 @@ footer {
     background-color: var(--primary-color);
     transition: width 0.3s ease;
 }
+
+#ai-categorization, #data-export {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#ai-suggestion {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+#data-export button {
+    margin-right: 1rem;
+    background-color: var(--secondary-color);
+}
+
+#data-export button:hover {
+    background-color: var(--primary-color);
+}

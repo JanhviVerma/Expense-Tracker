@@ -429,6 +429,128 @@ function deleteGoal(goalId) {
     updateSavingsGoalsList();
 }
 
+// Add to existing code
+
+function aiCategorizeExpense(description) {
+    // Simulated AI categorization logic
+    const keywords = {
+        food: ['grocery', 'restaurant', 'meal', 'dinner', 'lunch', 'breakfast'],
+        transportation: ['gas', 'fuel', 'bus', 'train', 'taxi', 'uber'],
+        utilities: ['electricity', 'water', 'internet', 'phone'],
+        entertainment: ['movie', 'concert', 'game', 'book'],
+    };
+
+    description = description.toLowerCase();
+    for (const [category, words] of Object.entries(keywords)) {
+        if (words.some(word => description.includes(word))) {
+            return category;
+        }
+    }
+    return 'other';
+}
+
+document.getElementById('ai-categorize-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const description = document.getElementById('expense-description').value;
+    const suggestedCategory = aiCategorizeExpense(description);
+    document.getElementById('ai-suggestion').textContent = `Suggested category: ${suggestedCategory}`;
+});
+
+function exportToCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Name,Amount,Category,Date\n";
+    expenses.forEach(expense => {
+        csvContent += `${expense.name},${expense.amount},${expense.category},${expense.date}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "expenses.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+
+function exportToJSON() {
+    const jsonContent = JSON.stringify(expenses, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "expenses.json");
+    document.body.appendChild(link);
+    link.click();
+}
+
+document.getElementById('export-csv').addEventListener('click', exportToCSV);
+document.getElementById('export-json').addEventListener('click', exportToJSON);
+
+// Enhance updateExpenseAnalytics function
+function updateExpenseAnalytics() {
+    updateMonthlyComparison();
+    updateCategoryPercentage();
+    updateExpenseForecast();
+    updateExpenseHistoryChart();
+    predictFutureExpenses();
+}
+
+function predictFutureExpenses() {
+    const lastSixMonths = expenses
+        .filter(expense => new Date(expense.date) >= new Date(Date.now() - 180 * 24 * 60 * 60 * 1000))
+        .reduce((acc, expense) => {
+            const month = new Date(expense.date).toISOString().slice(0, 7); // "YYYY-MM" format
+            acc[month] = (acc[month] || 0) + expense.amount;
+            return acc;
+        }, {});
+
+    const months = Object.keys(lastSixMonths);
+    const totals = Object.values(lastSixMonths);
+    
+    if (months.length > 1) {
+        const trend = totals.reduce((acc, curr, index, array) => {
+            if (index === 0) return acc;
+            const prev = array[index - 1];
+            acc.push(curr - prev);
+            return acc;
+        }, []);
+        
+        const averageTrend = trend.reduce((acc, val) => acc + val, 0) / trend.length;
+
+        const futurePredictions = [];
+        const futureMonths = 6;
+        let lastTotal = totals[totals.length - 1];
+        
+        for (let i = 1; i <= futureMonths; i++) {
+            lastTotal += averageTrend;
+            futurePredictions.push({
+                month: addMonthsToDate(new Date(months[months.length - 1]), i),
+                predictedExpense: lastTotal
+            });
+        }
+
+        document.getElementById('expense-prediction').innerHTML = `
+            <h3>Future Expense Predictions</h3>
+            ${futurePredictions.map(pred => `
+                <p>${pred.month}: $${pred.predictedExpense.toFixed(2)}</p>
+            `).join('')}
+        `;
+    } else {
+        document.getElementById('expense-prediction').innerHTML = `
+            <h3>Future Expense Predictions</h3>
+            <p>Not enough data to predict future expenses.</p>
+        `;
+    }
+}
+
+function addMonthsToDate(date, months) {
+    const newDate = new Date(date);
+    newDate.setMonth(newDate.getMonth() + months);
+    return newDate.toISOString().slice(0, 7); // "YYYY-MM" format
+}
+
+
+// Call this function when updating the dashboard
+updateExpenseAnalytics();
+
 addExpenseForm.addEventListener('submit', addExpense);
 categoryFilter.addEventListener('change', updateExpenseList);
 sortBy.addEventListener('change', updateExpenseList);
