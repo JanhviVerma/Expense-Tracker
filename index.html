@@ -9,6 +9,13 @@
 <body>
     <header>
         <h1>Personal Expense Tracker</h1>
+        <nav>
+            <ul>
+                <li><a href="#expense-form">Add Expense</a></li>
+                <li><a href="#expense-list">View Expenses</a></li>
+                <li><a href="#expense-summary">Summary</a></li>
+            </ul>
+        </nav>
     </header>
     <main>
         <section id="expense-form">
@@ -38,7 +45,29 @@
         </section>
         <section id="expense-list">
             <h2>Expense List</h2>
+            <div id="filter-sort">
+                <label for="category-filter">Filter by Category:</label>
+                <select id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option value="food">Food</option>
+                    <option value="transportation">Transportation</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="other">Other</option>
+                </select>
+                <label for="sort-by">Sort by:</label>
+                <select id="sort-by">
+                    <option value="date">Date</option>
+                    <option value="amount">Amount</option>
+                    <option value="category">Category</option>
+                </select>
+            </div>
             <ul id="expenses"></ul>
+        </section>
+        <section id="expense-summary">
+            <h2>Expense Summary</h2>
+            <div id="total-expenses"></div>
+            <div id="category-breakdown"></div>
         </section>
     </main>
     <footer>
