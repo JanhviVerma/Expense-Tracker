@@ -7,10 +7,13 @@ const categoryBreakdown = document.getElementById('category-breakdown');
 const prevPageBtn = document.getElementById('prev-page');
 const nextPageBtn = document.getElementById('next-page');
 const pageInfo = document.getElementById('page-info');
+const budgetForm = document.getElementById('budget-form');
+const budgetProgress = document.getElementById('budget-progress');
 
 let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 let currentPage = 1;
 const expensesPerPage = 10;
+let monthlyBudget = parseFloat(localStorage.getItem('monthlyBudget')) || 0;
 
 function addExpense(event) {
     event.preventDefault();
@@ -33,6 +36,7 @@ function addExpense(event) {
     updateExpenseList();
     updateExpenseSummary();
     updateCharts();
+    updateDashboard();
     addExpenseForm.reset();
 }
 
@@ -50,6 +54,7 @@ function updateExpenseList() {
             <span>${expense.category}</span>
             <span>${expense.date}</span>
             <button onclick="deleteExpense(${expense.id})">Delete</button>
+            <button onclick="editExpense(${expense.id})">Edit</button>
         `;
         expenseList.appendChild(li);
     });
@@ -63,6 +68,24 @@ function deleteExpense(id) {
     updateExpenseList();
     updateExpenseSummary();
     updateCharts();
+    updateDashboard();
+}
+
+function editExpense(id) {
+    const expense = expenses.find(e => e.id === id);
+    if (expense) {
+        document.getElementById('expense-name').value = expense.name;
+        document.getElementById('expense-amount').value = expense.amount;
+        document.getElementById('expense-category').value = expense.category;
+        document.getElementById('expense-date').value = expense.date;
+
+        expenses = expenses.filter(e => e.id !== id);
+        updateLocalStorage();
+        updateExpenseList();
+        updateExpenseSummary();
+        updateCharts();
+        updateDashboard();
+    }
 }
 
 function filterExpenses() {
@@ -180,6 +203,67 @@ function updateTrendChart() {
 
 function updateLocalStorage() {
     localStorage.setItem('expenses', JSON.stringify(expenses));
+    localStorage.setItem('monthlyBudget', monthlyBudget.toString());
+}
+
+function setBudget(event) {
+    event.preventDefault();
+    monthlyBudget = parseFloat(document.getElementById('budget-amount').value);
+    updateLocalStorage();
+    updateBudgetProgress();
+    updateDashboard();
+}
+
+function updateBudgetProgress() {
+    const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const percentageSpent = (totalSpent / monthlyBudget) * 100;
+    
+    budgetProgress.innerHTML = `
+        <h3>Budget Progress</h3>
+        <p>Monthly Budget: $${monthlyBudget.toFixed(2)}</p>
+        <p>Total Spent: $${totalSpent.toFixed(2)}</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: ${percentageSpent}%"></div>
+        </div>
+        <p>${percentageSpent.toFixed(2)}% of budget spent</p>
+    `;
+}
+
+function updateDashboard() {
+    const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const budgetStatus = monthlyBudget - totalSpent;
+    const categories = {};
+    expenses.forEach(expense => {
+        categories[expense.category] = (categories[expense.category] || 0) + expense.amount;
+    });
+    const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0];
+    const recentExpenses = expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+    document.getElementById('total-spent').innerHTML = `
+        <h3>Total Spent</h3>
+        <p>$${totalSpent.toFixed(2)}</p>
+    `;
+
+    document.getElementById('budget-status').innerHTML = `
+        <h3>Budget Status</h3>
+        <p class="${budgetStatus >= 0 ? 'success' : 'danger'}">
+            ${budgetStatus >= 0 ? 'Under' : 'Over'} budget by $${Math.abs(budgetStatus).toFixed(2)}
+        </p>
+    `;
+
+    document.getElementById('top-category').innerHTML = `
+        <h3>Top Spending Category</h3>
+        <p>${topCategory ? `${topCategory[0]}: $${topCategory[1].toFixed(2)}` : 'N/A'}</p>
+    `;
+
+    const recentExpensesHtml = recentExpenses.map(expense => `
+        <li>${expense.name}: $${expense.amount.toFixed(2)}</li>
+    `).join('');
+
+    document.getElementById('recent-expenses').innerHTML = `
+        <h3>Recent Expenses</h3>
+        <ul>${recentExpensesHtml}</ul>
+    `;
 }
 
 addExpenseForm.addEventListener('submit', addExpense);
@@ -198,7 +282,10 @@ nextPageBtn.addEventListener('click', () => {
         updateExpenseList();
     }
 });
+budgetForm.addEventListener('submit', setBudget);
 
 updateExpenseList();
 updateExpenseSummary();
 updateCharts();
+updateBudgetProgress();
+updateDashboard();
