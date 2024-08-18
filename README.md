@@ -4,6 +4,8 @@
 
 The **Expense Tracker** is a web-based application that helps users manage and track their personal expenses. The app allows users to add, edit, and delete expenses while categorizing them for better financial management. It provides a clear overview of spending habits through a user-friendly interface.
 
+**[Visit the Website Live!](https://janhviverma.github.io/Expense-Tracker/)**
+
 ## Features
 
 - **Add Expenses:** Users can add expenses by specifying the amount, category, and description.
