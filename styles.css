@@ -263,3 +263,79 @@ footer {
         padding: 1.5rem;
     }
 }
+
+.expense-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expense-list ul {
+    list-style-type: none;
+}
+
+.expense-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.analytics-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+#expense-analytics .widget {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#expense-history-chart {
+    width: 100%;
+    height: 300px;
+    margin-top: 2rem;
+}
+
+#expense-goals {
+    background-color: #e9ecef;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+#savings-goal-form {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+#savings-goals-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.savings-goal {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.goal-progress {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.goal-progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}

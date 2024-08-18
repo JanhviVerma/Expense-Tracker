@@ -97,6 +97,32 @@
             </form>
             <div id="budget-progress"></div>
         </section>
+        <section class="expense-list">
+            <h2>Recent Expenses</h2>
+            <ul id="recent-expenses-list"></ul>
+        </section>
+        <section id="expense-analytics">
+            <h2>Expense Analytics</h2>
+            <div class="analytics-widgets">
+                <div class="widget" id="monthly-comparison"></div>
+                <div class="widget" id="category-percentage"></div>
+                <div class="widget" id="expense-forecast"></div>
+            </div>
+            <canvas id="expense-history-chart"></canvas>
+        </section>
+        <section id="expense-goals">
+            <h2>Savings Goals</h2>
+            <form id="savings-goal-form">
+                <label for="goal-name">Goal Name:</label>
+                <input type="text" id="goal-name" required>
+                <label for="goal-amount">Target Amount:</label>
+                <input type="number" id="goal-amount" step="0.01" required>
+                <label for="goal-date">Target Date:</label>
+                <input type="date" id="goal-date" required>
+                <button type="submit">Set Goal</button>
+            </form>
+            <div id="savings-goals-list"></div>
+        </section>
     </main>
     <footer>
         <p>&copy; 2024 Personal Expense Tracker. All rights reserved.</p>
